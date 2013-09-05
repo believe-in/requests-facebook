@@ -41,7 +41,8 @@ def _split_params_and_files(params_):
 
 
 class FacebookClientError(Exception):
-    def __init__(self, message, error_type=None):
+    def __init__(self, message, error_type=None, error_code=None,
+                 error_subcode=None):
         self.type = error_type
 
         self.message = message
@@ -60,7 +61,12 @@ class FacebookAPIError(FacebookClientError):
 
 
 class GraphAPIError(FacebookClientError):
-    pass
+
+    def __init__(self, error_code=None, error_subcode=None, *args, **kwargs):
+
+        self.error_code = error_code
+        self.error_subcode = error_subcode
+        super(GraphAPIError, self).__init__(*args, **kwargs)
 
 
 class FacebookAPI(object):
@@ -194,9 +200,14 @@ class GraphAPI(object):
             if content.get('error') is not None:
                 error = content['error']
                 error_type = error.get('type', '')
+                error_code = error.get('code', '')
+                error_subcode = error.get('subcode', '')
                 error_message = error.get('message', '')
 
-                raise GraphAPIError(error_message, error_type=error_type)
+                raise GraphAPIError(error_message,
+                                    error_type=error_type,
+                                    error_code=error_code,
+                                    error_subcode=error_subcode)
 
         return content
 
