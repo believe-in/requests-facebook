@@ -65,7 +65,7 @@ class GraphAPIError(FacebookClientError):
 
 class FacebookAPI(object):
     def __init__(self, client_id=None, client_secret=None, redirect_uri=None,
-                headers=None):
+                 headers=None):
 
         self.client_id = client_id
         self.client_secret = client_secret
@@ -88,13 +88,32 @@ class FacebookAPI(object):
 
     def get_access_token(self, code):
         url = 'https://graph.facebook.com/oauth/access_token'
-        qs = {
+        params = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'redirect_uri': self.redirect_uri,
             'code': code
         }
-        response = requests.get(url, params=qs, headers=self.headers)
+
+        return self.make_request(url, params)
+
+    def exchange_access_token(self, code):
+        url = 'https://graph.facebook.com/oauth/access_token'
+        params = {
+            'grant_type': 'fb_exchange_token',
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'fb_exchange_token': code
+        }
+
+        return self.make_request(url, params)
+
+    def make_request(self, url, params):
+
+        try:
+            response = requests.get(url, params=params, headers=self.headers)
+        except requests.OAuthException:
+            raise FacebookAuthError('Invalid access token')
 
         status_code = response.status_code
         content = response.content
