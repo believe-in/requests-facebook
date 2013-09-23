@@ -62,11 +62,14 @@ class FacebookAPIError(FacebookClientError):
 
 class GraphAPIError(FacebookClientError):
 
-    def __init__(self, error_code=None, error_subcode=None, *args, **kwargs):
+    def __init__(self, message, error_code=None, error_subcode=None,
+                 error_type=None):
 
         self.error_code = error_code
         self.error_subcode = error_subcode
-        super(GraphAPIError, self).__init__(*args, **kwargs)
+        super(GraphAPIError, self).__init__(message, error_code=error_code,
+                                            error_subcode=error_subcode,
+                                            error_type=error_type)
 
 
 class FacebookAPI(object):
